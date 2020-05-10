@@ -27,6 +27,7 @@ type Provider interface {
 	ErrorURL() *url.URL
 	PublicURL() *url.URL
 	IssuerURL() *url.URL
+	IssuerDynamicURL(*http.Request) *url.URL
 	OAuth2AuthURL() string
 	OAuth2ClientRegistrationURL() *url.URL
 	AllowTLSTerminationFrom() []string

@@ -67,6 +67,8 @@ const (
 	ViperKeyErrorURL                       = "urls.error"
 	ViperKeyPublicURL                      = "urls.self.public"
 	ViperKeyIssuerURL                      = "urls.self.issuer"
+	ViperKeyIssuerHostPlaceholder          = "urls.self.host_placeholder"
+	ViperKeyIssuerDynamicHostHeader        = "urls.self.dynamic_host_header"
 	ViperKeyAllowTLSTerminationFrom        = "serve.tls.allow_termination_from"
 	ViperKeyAccessTokenStrategy            = "strategies.access_token"
 	ViperKeySubjectIdentifierAlgorithmSalt = "oidc.subject_identifiers.pairwise.salt"
@@ -440,4 +442,22 @@ func (v *ViperProvider) ShareOAuth2Debug() bool {
 
 func (v *ViperProvider) PKCEEnforced() bool {
 	return viperx.GetBool(v.l, ViperKeyPKCEEnforced, false, "OAUTH2_PKCE_ENFORCED")
+}
+
+//================================================================
+//Unlmitech Cloud Customization
+//================================================================
+
+func (v *ViperProvider) IssuerHostPlaceholder() string {
+	return strings.TrimRight(viperx.GetString(v.l, ViperKeyIssuerHostPlaceholder, "::host::", "OAUTH2_ISSUER_HOST_PLACEHOLDER"), " ")
+}
+
+func (v *ViperProvider) IssuerDynamicHostHeader() string {
+	return strings.TrimRight(viperx.GetString(v.l, ViperKeyIssuerDynamicHostHeader, "X-Request-Host", "OAUTH2_ISSUER_DYNAMIC_HOST_HEADER"), " ")
+}
+
+func (v *ViperProvider) IssuerDynamicURL(r *http.Request) *url.URL {
+	var host = r.Header.Get(v.IssuerDynamicHostHeader())
+	var url = strings.ReplaceAll(v.IssuerURL().String(), v.IssuerHostPlaceholder(), host)
+	return urlRoot(urlx.ParseOrFatal(v.l, url))
 }

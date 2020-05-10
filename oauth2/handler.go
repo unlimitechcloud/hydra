@@ -543,6 +543,9 @@ func (h *Handler) FlushHandler(w http.ResponseWriter, r *http.Request, _ httprou
 //       401: genericError
 //       500: genericError
 func (h *Handler) TokenHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("HOLA MUNDO %+v \n", r.Header.Get("X-Request-Host"))
+	fmt.Printf("Base Issuer: %s\n", strings.TrimRight(h.c.IssuerURL().String(), "/") + "/")
+	fmt.Printf("Dynamic Issuer: %s\n", strings.TrimRight(h.c.IssuerDynamicURL(r).String(), "/") + "/")
 	var session = NewSession("")
 	var ctx = r.Context()
 
@@ -567,7 +570,7 @@ func (h *Handler) TokenHandler(w http.ResponseWriter, r *http.Request) {
 		session.Subject = accessRequest.GetClient().GetID()
 		session.ClientID = accessRequest.GetClient().GetID()
 		session.KID = accessTokenKeyID
-		session.DefaultSession.Claims.Issuer = strings.TrimRight(h.c.IssuerURL().String(), "/") + "/"
+		session.DefaultSession.Claims.Issuer = strings.TrimRight(h.c.IssuerDynamicURL(r).String(), "/") + "/"
 		session.DefaultSession.Claims.IssuedAt = time.Now().UTC()
 
 		for _, scope := range accessRequest.GetRequestedScopes() {
